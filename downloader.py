@@ -4,7 +4,7 @@ import Queue
 ##from multiprocessing.dummy import Pool as ThreadPool
 
 numberOfThreads = 4
-
+url='https://i.redd.it/9orb8me3xpv11.jpg'
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
@@ -18,11 +18,8 @@ def headQuery(url):
     except Exception as e:
         print e
         return False
-    p=re.compile('Content-Length:\s(\d+)')
-    if 'Accept-Ranges: bytes' in str(response.headers):
-        s=re.search(p,str(response.headers))
-    if s:return int(s.group(1))
-    return False
+    try: return response.headers['Content-Length']
+    except: return False
 
 #example: headQuery('https://i.redd.it/5wyehherasv11.jpg')
 
@@ -57,35 +54,34 @@ def thread(url,startByte,endByte):
     return data
     #collect data into arrays/dictionaries with keys as byterange/id
 
-#print(thread('https://i.redd.it/5wyehherasv11.jpg',100,10000))
 
 
-pool = ThreadPool(4) 
-results = pool.map(urllib2.urlopen, urls)
-pool.close() 
-pool.join()
+##pool = ThreadPool(4) 
+##results = pool.map(urllib2.urlopen, urls)
+##pool.close() 
+##pool.join()
 
-#???
-##class Downloader(Thread):
-##    def __init__(self, queue):
-##        Thread.__init__(self)
-##        self.queue = queue
-##    def run(self):
-##        while True:
-##            # Get the work from the queue and expand the tuple
-##            directory, link = self.queue.get()
-##            try:
-##                download_link(directory, link)
-##            finally:
-##                self.queue.task_done()
+#example byte ranges
+data={}
+data[0]=thread(url,0,199999)
+data[200000]=thread(url,200000,399999)
+data[400000]=thread(url,400000,599999)
+data[600000]=thread(url,600000,745899)
 
-#def fetcher(url,byteRange):
-#    req = urllib2.Request(url, headers=byteRange)
-#    #wrap below line in try-except a few times, if fails, throw error
-#    data = urllib2.urlopen(req).read()
-#    return data
-#    #collect data into arrays/dictionaries with keys as byterange/id
-
+import os
 def writer():
-    pass
+    fn=re.compile('([^/]+\.\w+$)')
+    result=re.search(fn,url)
+    if result:
+        filename=result.group(1)
+    else:
+        filename='file.txt'
+    while(os.path.exists(filename)):
+        parts=filename.split('.')
+        filename=parts[0]+'_1'+'.'+parts[1]
+    sortedKeys=sorted(data.keys())
+    with open(filename,'wb') as f:
+        for i in sortedKeys:
+            f.write(data[i])
+    print('{} saved at this script\'s folder'.format(filename))
 
