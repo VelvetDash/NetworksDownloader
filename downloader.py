@@ -1,6 +1,6 @@
 import urllib2,re
-from queue import Queue
-from threading import Thread
+##from queue import Queue
+##from threading import Thread
 
 numberOfThreads = 4
 
@@ -18,9 +18,11 @@ def headQuery(url):
         return False
     p=re.compile('Content-Length:\s(\d+)')
     if 'Accept-Ranges: bytes' in str(response.headers):
-	s=re.search(p,str(response.headers))
-	if s:return int(s.group(1))
+        s=re.search(p,str(response.headers))
+    if s:return int(s.group(1))
     return False
+
+#example: headQuery('https://i.redd.it/5wyehherasv11.jpg')
 
 def splitter(numBytes,threads):
     arr=[]
@@ -32,20 +34,21 @@ def splitter(numBytes,threads):
 def thread(url,startByte,endByte):
     #format as dictionaries like {'Range':'bytes=0-99999'} and return tuple of dictionaries
     #max of 1mb per byteRange
+    pass
 
 #???
-class Downloader(Thread):
-    def __init__(self, queue):
-        Thread.__init__(self)
-        self.queue = queue
-    def run(self):
-        while True:
-            # Get the work from the queue and expand the tuple
-            directory, link = self.queue.get()
-            try:
-                download_link(directory, link)
-            finally:
-                self.queue.task_done()
+##class Downloader(Thread):
+##    def __init__(self, queue):
+##        Thread.__init__(self)
+##        self.queue = queue
+##    def run(self):
+##        while True:
+##            # Get the work from the queue and expand the tuple
+##            directory, link = self.queue.get()
+##            try:
+##                download_link(directory, link)
+##            finally:
+##                self.queue.task_done()
 
 def fetcher(url,byteRange):
     req = urllib2.Request(url, headers=byteRange)
