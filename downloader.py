@@ -45,7 +45,20 @@ def splitter(numBytes,threads=numberOfThreads):
 def thread(url,startByte,endByte):
     #format as dictionaries like {'Range':'bytes=0-99999'} and return tuple of dictionaries
     #max of 1mb per byteRange
-    pass
+    
+    if (endByte - startByte) > 1*1024*1024:
+        print "ByteRange should be within a maximum of 1 MB"
+        return False
+    
+    req = urllib2.Request(url)
+    req.headers['Range'] = 'bytes=%s-%s' % (startByte, endByte)
+    #wrap below line in try-except a few times, if fails, throw error
+    data = urllib2.urlopen(req).read()
+    return data
+    #collect data into arrays/dictionaries with keys as byterange/id
+
+#print(thread('https://i.redd.it/5wyehherasv11.jpg',100,10000))
+
 
 pool = ThreadPool(4) 
 results = pool.map(urllib2.urlopen, urls)
@@ -66,12 +79,13 @@ pool.join()
 ##            finally:
 ##                self.queue.task_done()
 
-def fetcher(url,byteRange):
-    req = urllib2.Request(url, headers=byteRange)
-    #wrap below line in try-except a few times, if fails, throw error
-    data = urllib2.urlopen(req).read()
-    return data
-    #collect data into arrays/dictionaries with keys as byterange/id
+#def fetcher(url,byteRange):
+#    req = urllib2.Request(url, headers=byteRange)
+#    #wrap below line in try-except a few times, if fails, throw error
+#    data = urllib2.urlopen(req).read()
+#    return data
+#    #collect data into arrays/dictionaries with keys as byterange/id
 
 def writer():
     pass
+
