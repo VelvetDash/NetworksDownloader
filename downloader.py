@@ -64,7 +64,7 @@ else:
 threadPool=[]
 for i in range(numberOfThreads):
     threadPool.append(Thread(name='thread'+str(i), target=thread, args=args[i]))
-    for t in threadPool:
+for t in threadPool:
     t.start()
 for t in threadPool:
     t.join()
