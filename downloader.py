@@ -1,7 +1,7 @@
 import urllib2,re
 import Queue
 ##from threading import Thread
-##from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing.dummy import Pool as ThreadPool
 
 numberOfThreads = 4
 url='https://i.redd.it/9orb8me3xpv11.jpg'
@@ -10,7 +10,7 @@ class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
-def headQuery(url):
+def headQuery(url=url):
     req = HeadRequest(url)
     try:
         response = urllib2.urlopen(req)
@@ -18,7 +18,7 @@ def headQuery(url):
     except Exception as e:
         print e
         return False
-    try: return response.headers['Content-Length']
+    try: return int(response.headers['Content-Length'])
     except: return False
 
 #example: headQuery('https://i.redd.it/5wyehherasv11.jpg')
@@ -51,22 +51,32 @@ def thread(url,startByte,endByte):
     req.headers['Range'] = 'bytes=%s-%s' % (startByte, endByte)
     #wrap below line in try-except a few times, if fails, throw error
     data = urllib2.urlopen(req).read()
-    return data
+    #return data
+    dataDict[startByte]=data
     #collect data into arrays/dictionaries with keys as byterange/id
 
+#splits the arg into its components
+#threadcaller(args) -> thread(args[0],args[1],args[2])
+threadcaller = lambda args: thread(url, args[0], args[1])
+
+byteSize = headQuery()
+if byteSize and byteSize>0:
+    args=splitter(byteSize)
+else:
+    raise Exception('cannot get number of bytes of the file in that URL')
 
 
-##pool = ThreadPool(4) 
-##results = pool.map(urllib2.urlopen, urls)
-##pool.close() 
-##pool.join()
-
+dataDict={}
 #example byte ranges
-data={}
-data[0]=thread(url,0,199999)
-data[200000]=thread(url,200000,399999)
-data[400000]=thread(url,400000,599999)
-data[600000]=thread(url,600000,745899)
+##data[0]=thread(url,0,199999)
+##data[200000]=thread(url,200000,399999)
+##data[400000]=thread(url,400000,599999)
+##data[600000]=thread(url,600000,745899)
+
+pool = ThreadPool(numberOfThreads) 
+results = pool.map(threadcaller, args)
+pool.close()
+pool.join()
 
 import os
 def writer():
@@ -79,9 +89,8 @@ def writer():
     while(os.path.exists(filename)):
         parts=filename.split('.')
         filename=parts[0]+'_1'+'.'+parts[1]
-    sortedKeys=sorted(data.keys())
+    sortedKeys=sorted(dataDict.keys())
     with open(filename,'wb') as f:
         for i in sortedKeys:
-            f.write(data[i])
+            f.write(dataDict[i])
     print('{} saved at this script\'s folder'.format(filename))
-
