@@ -45,8 +45,9 @@ def thread(startByte,endByte):
     if (endByte - startByte) > 1*1024*1024:
         #print "ByteRange should be within a maximum of 1 MB"
         #return False
-        splits = splitter(endByte-startByte, (endByte-startByte)+1)
+        splits = splitter(endByte-startByte, (endByte-startByte)/1000000+1)
         map(thread,splits)
+        return
         
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes=%s-%s' % (startByte, endByte)
