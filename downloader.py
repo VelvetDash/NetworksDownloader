@@ -4,7 +4,9 @@ from threading import Thread
 ##from multiprocessing.dummy import Pool as ThreadPool
 
 numberOfThreads = 4
-url='https://i.redd.it/9orb8me3xpv11.jpg'
+url='https://i.redd.it/9orb8me3xpv11.jpg'         #image file
+##url='https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
+##url='http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
 dataDict={}
 
 class HeadRequest(urllib2.Request):
@@ -39,21 +41,17 @@ def splitter(numBytes,threads=numberOfThreads):
 #example: splitter(12345678,4)
 
 def thread(startByte,endByte):
-    #format as dictionaries like {'Range':'bytes=0-99999'} and return tuple of dictionaries
-    #max of 1mb per byteRange
-    
-    if (endByte - startByte) > 1*1024*1024:
-        #print "ByteRange should be within a maximum of 1 MB"
-        #return False
-        splits = splitter(endByte-startByte, (endByte-startByte)/1000000+1)
-        map(thread,splits)
-        return
-        
+    #format as dictionaries like {'Range':'bytes=0-999999'} and return tuple of dictionaries
+    #https://www.google.com/search?q=python+optimal+file+chunk+size
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes=%s-%s' % (startByte, endByte)
-    data = urllib2.urlopen(req).read()
-    dataDict[startByte]=data
-
+    data = urllib2.urlopen(req)
+    s=startByte
+    while endByte>s+1024**2:
+        dataDict[s]=data.read(1024**2)
+        s+=1024**2
+    dataDict[s]=data.read(endByte-s +1)
+    data.close()
 
 byteSize = headQuery()
 if byteSize and byteSize>0:
