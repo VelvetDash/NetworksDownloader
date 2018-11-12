@@ -61,13 +61,16 @@ def checker():
         length+=len(v)
     for start in keys:
         end=start+len(dataDict[start])-1
+        if end>=byteSize:
+            print('byte range exceeded\nend:{} byteSize:{}'.format(end,byteSize))
+            return False
         for i in keys:
             #print('start:{} end:{} i:{}'.format(start,end,i)) #for debug
             if i>start and i<=end:
-                print('start:{} end:{} i:{}'.format(start,end,i))
+                print('overlap detected\nstart:{} end:{} i:{}'.format(start,end,i))
                 return False
     if length!=byteSize:
-        print('length:{} byteSize:{}'.format(length,byteSize))
+        print('length difference\nlength:{} byteSize:{}'.format(length,byteSize))
         return False
     return True
 
@@ -83,8 +86,8 @@ def fixer():
         #fix missing data
         if k+len(dataDict[k])<cutoff:
             req = urllib2.Request(url)
-            print('requesting bytes:{}-{}'.format(k+len(dataDict[k]), cutoff))
-            req.headers['Range'] = 'bytes=%s-%s' % (k+len(dataDict[k]), cutoff)
+            print('requesting bytes:{}-{}'.format(k+len(dataDict[k]), cutoff-1))
+            req.headers['Range'] = 'bytes=%s-%s' % (k+len(dataDict[k]), cutoff-1)
             data = urllib2.urlopen(req)
             dataDict[k+len(dataDict[k])]=data.read()
         cutoff=k
@@ -128,20 +131,50 @@ for t in threadPool:
     t.join()
 while not checker():
     fixer()
-writer()
+##writer()
 
 
 ###################################test cases
 ##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
 ##byteSize=28
 ##checker()
+##
+### missing data at middle
 ##dataDict[7]='abc'
 ##checker()
 ##fixer()
 ##dataDict[10]='defg'
 ##checker()
 ##
+### excess data at middle
 ##dataDict[10]='defghi'
 ##checker()
 ##fixer()
+##checker()
+##
+### excess data at end
+##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefg',21:'abcdefgh'}
+##checker()
+##fixer()
+##checker()
+##
+### missing data at end
+##dataDict[21]='abcdef'
+##checker()
+##fixer()
+##dataDict[27]='g'
+##checker()
+##
+### missing data at middle and excess data at end
+##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdef',21:'abcdefgh'}
+##checker()
+##fixer()
+##dataDict[20]='g'
+##checker()
+##
+### excess data at middle and missing data at end
+##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefgh',21:'abcdef'}
+##checker()
+##fixer()
+##dataDict[27]='g'
 ##checker()
