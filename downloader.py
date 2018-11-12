@@ -200,7 +200,7 @@ if __name__ == '__main__':
 ##checker()
 ##
 ### missing data at start
-##dataDict={1:'cdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
+##dataDict={2:'cdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
 ##checker()
 ##fixer()
 ##dataDict[0]='ab'
