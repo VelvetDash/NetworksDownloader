@@ -99,9 +99,8 @@ def fixer():
             dataDict[k+len(dataDict[k])]=data.read()
         cutoff=k
     
-
+# returns a file name that is available
 def getFileName():
-    #returns a file name that is available
     fn=re.compile('([^/]+\.[^/]+$)')
     result=re.search(fn,url)
     if result:
@@ -113,8 +112,9 @@ def getFileName():
         filename=parts[0]+'_1'+'.'+parts[1]
     return filename
 
+
+# writes data to file
 def writer():
-    #writes data to file
     filename=getFileName()
     sortedKeys=sorted(dataDict.keys())
     with open(filename,'wb') as f:
@@ -133,9 +133,9 @@ if __name__ == '__main__':
     numberOfThreads = 4
     dataDict={}
 
-    url = 'https://i.redd.it/9orb8me3xpv11.jpg'         #image file
-    urlT = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
-    urlL = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
+    ##url = 'https://i.redd.it/9orb8me3xpv11.jpg'         #image file
+    ##url = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
+    url = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
     
     byteSize = headQuery(url)
     print 'data size: '+str(byteSize)
@@ -149,11 +149,11 @@ if __name__ == '__main__':
     threadPool=[]
     for i in range(numberOfThreads):
         threadPool.append(Thread(name='thread'+str(i), target=thread, args=args[i]))
-        print 'thread'+str(i)+' byte range: '+str(args[i])
+        #print 'thread'+str(i)+' byte range: '+str(args[i])
         
     print '\nStart multi-thread downloading...\n'
     
-    startTime = time()
+    #startTime = time()
     for t in threadPool:
         t.start()
     for t in threadPool:
@@ -161,9 +161,10 @@ if __name__ == '__main__':
     while not checker():
         fixer()
     writer()
-    endTime = time()
+    #endTime = time()
     
-    print '\nFinish downloading in %s seconds' %(endTime-startTime)
+    #print '\nFinish downloading in %s seconds' %(endTime-startTime)
+
 
 
 ###################################test cases
