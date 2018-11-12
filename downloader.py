@@ -95,7 +95,7 @@ def fixer():
 
 def getFileName():
     #returns a file name that is available
-    fn=re.compile('([^/]+\.\w+$)')
+    fn=re.compile('([^/]+\.[^/]+$)')
     result=re.search(fn,url)
     if result:
         filename=result.group(1)
@@ -131,7 +131,7 @@ for t in threadPool:
     t.join()
 while not checker():
     fixer()
-##writer()
+writer()
 
 
 ###################################test cases
