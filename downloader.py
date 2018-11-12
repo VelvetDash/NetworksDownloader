@@ -1,18 +1,21 @@
 import urllib2,re,os
-import Queue
+#import Queue
 from threading import Thread
+from time import time
 
-numberOfThreads = 4
-url='https://i.redd.it/9orb8me3xpv11.jpg'         #image file
-##url='https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
-##url='http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
-dataDict={}
+#numberOfThreads = 4
+#url='https://i.redd.it/9orb8me3xpv11.jpg'         #image file
+###url='https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
+###url='http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
+#dataDict={}
+
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
-def headQuery(url=url):
+# request and return length of content
+def headQuery(url):
     #gets number of bytes of the file at url
     req = HeadRequest(url)
     try:
@@ -24,8 +27,9 @@ def headQuery(url=url):
     try: return int(response.headers['Content-Length'])
     except: return False
 
-def splitter(numBytes,threads=numberOfThreads):
-    #splits bytes into 'threads' number of ranges
+
+# split bytes into 'threads' number of ranges
+def splitter(numBytes,threads):
     arr,arrOfTuples=[],[]
     n = int(numBytes/threads)
     for i in range(threads-1):
@@ -39,6 +43,8 @@ def splitter(numBytes,threads=numberOfThreads):
         start=arr[i]+1
     return arrOfTuples
 
+
+#
 def thread(startByte,endByte):
     #format as dictionaries like {'Range':'bytes=0-999999'} and return tuple of dictionaries
     #https://www.google.com/search?q=python+optimal+file+chunk+size
@@ -52,8 +58,8 @@ def thread(startByte,endByte):
     dataDict[s]=data.read(endByte-s +1)
     data.close()
 
+# checks whether there are overlaps/ missing data/ excess data
 def checker():
-    #checks whether there are overlaps/ missing data/ excess data
     keys=[]
     length=0
     for k,v in dataDict.iteritems():
@@ -74,8 +80,9 @@ def checker():
         return False
     return True
 
+
+# in-place fixes for problems detected by checker()
 def fixer():
-    #in-place fixes for problems detected by checker()
     keys=sorted(dataDict.iterkeys(),reverse=True)
     cutoff=byteSize
     for k in keys:
@@ -114,24 +121,49 @@ def writer():
         for i in sortedKeys:
             f.write(dataDict[i])
     sep = '\\' if os.name=='nt' else '/'
-    print('saved at {}{}{}'.format(os.getcwd(),sep,filename))
+    print('File saved at {}{}{}'.format(os.getcwd(),sep,filename))
 
-byteSize = headQuery()
-if byteSize and byteSize>0:
-    args=splitter(byteSize)
-else:
-    raise Exception('cannot get number of bytes of the file in that URL')
 
-threadPool=[]
-for i in range(numberOfThreads):
-    threadPool.append(Thread(name='thread'+str(i), target=thread, args=args[i]))
-for t in threadPool:
-    t.start()
-for t in threadPool:
-    t.join()
-while not checker():
-    fixer()
-writer()
+
+
+
+if __name__ == '__main__':
+    
+    # initialization
+    numberOfThreads = 4
+    dataDict={}
+
+    url = 'https://i.redd.it/9orb8me3xpv11.jpg'         #image file
+    urlT = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
+    urlL = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'   #large file
+    
+    byteSize = headQuery(url)
+    print 'data size: '+str(byteSize)
+    
+    if byteSize and byteSize>0:
+        args=splitter(byteSize,numberOfThreads)
+    else:
+        raise Exception('cannot get number of bytes of the file in that URL')
+    
+    
+    threadPool=[]
+    for i in range(numberOfThreads):
+        threadPool.append(Thread(name='thread'+str(i), target=thread, args=args[i]))
+        print 'thread'+str(i)+' byte range: '+str(args[i])
+        
+    print '\nStart multi-thread downloading...\n'
+    
+    startTime = time()
+    for t in threadPool:
+        t.start()
+    for t in threadPool:
+        t.join()
+    while not checker():
+        fixer()
+    writer()
+    endTime = time()
+    
+    print '\nFinish downloading in %s seconds' %(endTime-startTime)
 
 
 ###################################test cases
