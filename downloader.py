@@ -83,6 +83,7 @@ def checker():
 
 # in-place fixes for problems detected by checker()
 def fixer():
+    if not 0 in dataDict: dataDict[0]=""
     keys=sorted(dataDict.iterkeys(),reverse=True)
     cutoff=byteSize
     for k in keys:
@@ -198,6 +199,12 @@ if __name__ == '__main__':
 ##dataDict[27]='g'
 ##checker()
 ##
+### missing data at start
+##dataDict={1:'cdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
+##checker()
+##fixer()
+##dataDict[0]='ab'
+##checker()
 ### missing data at middle and excess data at end
 ##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdef',21:'abcdefgh'}
 ##checker()
