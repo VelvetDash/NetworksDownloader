@@ -9,8 +9,29 @@ Create a multi-threaded downloader for parallel data downloading (as a service t
 that would download data in parallel data and merge in proper order before passing to the browser.
 
 ## Implementation
+### Header Extraction
+We use `urllib2` to request the header of target url. In the header, there are two values that we are interested:
+
+
+`Content-Length`: Length of data stream, which is going to be split into trunks for multiple threads.
+
+
+`Accept-Range`: We use this value to confirm that the server accept partial byte ranges, so each thread can request different byte ranges.
+
+
+### Thread splitting
+With length of data that will be downloaded, we then split those bytes into threads.
+
+
+### Downloading
+For each thread, we get the data using `urllib2.urlopen`. The optimal chunk size is set to be 1MB. Data are downloaded in chunks and stored to data dictionary.
+
+
+### Merging
+
 
 ## Testing
+
 
 ## How to Run
 Download the zip file and extract it.
