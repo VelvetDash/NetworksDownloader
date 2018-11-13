@@ -154,7 +154,7 @@ if __name__ == '__main__':
         
     print '\nStart multi-thread downloading...\n'
     
-    #startTime = time()
+    startTime = time()
     for t in threadPool:
         t.start()
     for t in threadPool:
@@ -162,59 +162,6 @@ if __name__ == '__main__':
     while not checker():
         fixer()
     writer()
-    #endTime = time()
+    endTime = time()
     
-    #print '\nFinish downloading in %s seconds' %(endTime-startTime)
-
-
-
-###################################test cases
-##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
-##byteSize=28
-##checker()
-##
-### missing data at middle
-##dataDict[7]='abc'
-##checker()
-##fixer()
-##dataDict[10]='defg'
-##checker()
-##
-### excess data at middle
-##dataDict[10]='defghi'
-##checker()
-##fixer()
-##checker()
-##
-### excess data at end
-##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefg',21:'abcdefgh'}
-##checker()
-##fixer()
-##checker()
-##
-### missing data at end
-##dataDict[21]='abcdef'
-##checker()
-##fixer()
-##dataDict[27]='g'
-##checker()
-##
-### missing data at start
-##dataDict={2:'cdefg',7:'abcdefg',14:'abcdefg',21:'abcdefg'}
-##checker()
-##fixer()
-##dataDict[0]='ab'
-##checker()
-### missing data at middle and excess data at end
-##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdef',21:'abcdefgh'}
-##checker()
-##fixer()
-##dataDict[20]='g'
-##checker()
-##
-### excess data at middle and missing data at end
-##dataDict={0:'abcdefg',7:'abcdefg',14:'abcdefgh',21:'abcdef'}
-##checker()
-##fixer()
-##dataDict[27]='g'
-##checker()
+    print '\nFinish downloading in %s seconds' %(endTime-startTime)
