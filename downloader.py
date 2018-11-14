@@ -1,4 +1,4 @@
-import urllib.request, re, os
+import urllib2, re, os
 # import Queue
 from threading import Thread
 from time import time
@@ -11,7 +11,7 @@ import argparse
 # dataDict={}
 
 
-class HeadRequest(urllib.request.Request):
+class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
@@ -21,7 +21,7 @@ def headQuery(url):
     # gets number of bytes of the file at url
     req = HeadRequest(url)
     try:
-        response = urllib.request.urlopen(req)
+        response = urllib2.urlopen(req)
         response.close()
     except Exception as e:
         print(e)
@@ -52,9 +52,9 @@ def splitter(numBytes, threads):
 def thread(startByte, endByte):
     # format as dictionaries like {'Range':'bytes=0-999999'} and return tuple of dictionaries
     # https://www.google.com/search?q=python+optimal+file+chunk+size
-    req = urllib.request.Request(url)
+    req = urllib2.Request(url)
     req.headers['Range'] = 'bytes=%s-%s' % (startByte, endByte)
-    data = urllib.request.urlopen(req)
+    data = urllib2.urlopen(req)
     s = startByte
     while endByte > s + 1024 ** 2:
         dataDict[s] = data.read(1024 ** 2)
@@ -98,10 +98,10 @@ def fixer():
             dataDict[k] = truncBytes
         # fix missing data
         if k + len(dataDict[k]) < cutoff:
-            req = urllib.request.Request(url)
+            req = urllib2.Request(url)
             print('requesting bytes:{}-{}'.format(k + len(dataDict[k]), cutoff - 1))
             req.headers['Range'] = 'bytes=%s-%s' % (k + len(dataDict[k]), cutoff - 1)
-            data = urllib.request.urlopen(req)
+            data = urllib2.urlopen(req)
             dataDict[k + len(dataDict[k])] = data.read()
         cutoff = k
 
@@ -133,31 +133,38 @@ def writer():
 
 if __name__ == '__main__':
 
-    # initialization
-    # numberOfThreads = 4
+    # initialization    
     dataDict = {}
+    
+    # parser for user to choose url and number of threads
     parser = argparse.ArgumentParser()
     parser.usage = "PythonProgram -n <numberOfThreads> -i <InputURL>"
     parser.add_argument('-i', '--url')
     parser.add_argument('-n', '--threadCount', type=int)
-    args = parser.parse_args()
-    url = args.url
-    numberOfThreads = args.threadCount
-    ##url = 'https://i.redd.it/9orb8me3xpv11.jpg'         #image file
-    ##url = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    #text file
-    ##url = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'  # large file
+    parserArgs = parser.parse_args()
+    url = parserArgs.url
+    numberOfThreads = parserArgs.threadCount
+    
+    # sample variables
+    #numberOfThreads = 4
+    #url = 'https://i.redd.it/9orb8me3xpv11.jpg'         # image file
+    #url = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    # text file
+    #url = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'  # large file
+    
     print("----------downloader----------------")
     print("Number of Threads:     {0}".format(numberOfThreads))
     print("Input URL:             {0}".format(url))
-
+    
+    # get data size for given url
     byteSize = headQuery(url)
-    print('data size: ' + str(byteSize))
+    print("Data Size:             {0}".format(byteSize))
 
     if byteSize and byteSize > 0:
         args = splitter(byteSize, numberOfThreads)
     else:
         raise Exception('cannot get number of bytes of the file in that URL')
 
+    # create threads
     threadPool = []
     for i in range(numberOfThreads):
         threadPool.append(Thread(name='thread' + str(i), target=thread, args=args[i]))
