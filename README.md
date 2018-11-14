@@ -5,8 +5,7 @@
 Multi-threaded downloader
 
 ## Project Description
-Create a multi-threaded downloader for parallel data downloading (as a service to browsers, for example), 
-that would download data in parallel data and merge in proper order before passing to the browser.
+Create a multi-threaded downloader for parallel data downloading (as a service to browsers, for example), that would download data in parallel data and merge in proper order before passing to the browser.
 
 ## Implementation
 ### Header Extraction
@@ -19,18 +18,46 @@ We use `urllib2` to request the header of target url. In the header, there are t
 `Accept-Range`: We use this value to confirm that the server accept partial byte ranges, so each thread can request different byte ranges.
 
 
-### Thread splitting
+### Splitting
 With length of data that will be downloaded, we then split those bytes into threads.
 
 
+The function `splitter` returns an array of threads. Each element in the array is a tuple of start index and end index for one thread. For example:
+```
+[(0, 186474), (186475, 372948), (372949, 559422), (559423, 745899)]
+```
+The tuple is used to decide which part of the data is downloaded by this thread.
+
+
+### Thread creation
+We then created several threads. Each thread's callable object is set to be the function for single thread downloading, and result of splitting is used as the arguments for the callable function.
+```python
+args = splitter(byteSize, numberOfThreads)
+```
+```python
+threadPool = []
+for i in range(numberOfThreads):
+    threadPool.append(Thread(name='thread' + str(i), target=thread, args=args[i])
+```
+
+
+The threads can be activated by the `start()` methods.
+
+
 ### Downloading
-For each thread, we get the data using `urllib2.urlopen`. The optimal chunk size is set to be 1MB. Data are downloaded in chunks and stored to data dictionary.
+For each thread, we get the data using `urllib2.urlopen`. The optimal chunk size is set to be 1MB. Data are downloaded in chunks and stored to data dictionary. The format of items in data dictionary is:
+```
+{[start index]: [data fragment downloaded]}
+```
 
 
 ### Merging
+After finish segment downloading, we sort the dictionary so that the data fragments are in the correct order. Then for each key, we write the segments to the output file.
 
 
 ## Testing
+### checker
+### fixer
 
 
 ## How to Run
