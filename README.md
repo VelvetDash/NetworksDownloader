@@ -56,11 +56,19 @@ After finish segment downloading, we sort the dictionary so that the data fragme
 
 
 ## Testing
-### checker
-### fixer
+The program will detect the following case of problems and fix it:
+* missing data at start
+* missing data at middle
+* missing data at end
+* overlap data at middle
+* excess data at end
+* missing data at middle and excess data at end (same total sum of bytes)
+* overlap data at middle and missing data at end  (same total sum of bytes)
+
+Test cases for above issues are provided in `tester.py`, which demonstrates the effect of `checker` and `fixer`.
 
 
-## How to Run
+## How to Run the Program
 Download the zip file and extract it.
 
 Open command prompt (or terminal for UNIX system), `cd` to the folder `NetworksDownloader`, where you could find `downloader.py`.
