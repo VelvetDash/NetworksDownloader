@@ -36,21 +36,39 @@ For each thread, we get the data using `urllib2.urlopen`. The optimal chunk size
 ## How to Run
 Download the zip file and extract it.
 
+Open command prompt (or terminal for UNIX system), `cd` to the folder `NetworksDownloader`, where you could find `downloader.py`.
 
-Open `downloader.py`, some of the initial variables could be modified.
-```python
-# initialization
-numberOfThreads = 4
-dataDict={}
 
-url = 'https://i.redd.it/9orb8me3xpv11.jpg'
+Make sure you are using **python2** to run the program.
+
+
+Run the command `python downloader.py -n [number of threads] -i [link of file you want to download]`.
+
+
+For example, `python downloader.py -n 4 -i https://i.redd.it/9orb8me3xpv11.jpg`
+
+
+We have provided three example urls for testing:
+```
+url = 'https://i.redd.it/9orb8me3xpv11.jpg'         # image file
+url = 'https://www.w3.org/TR/PNG/iso_8859-1.txt'    # text file
+url = 'http://vis-www.cs.umass.edu/lfw/lfw-a.zip'  # large file
 ```
 
 
-`numberOfThreads` is the number of threads used for the downloader. The default value is `4`.
+After running the command, the details of downloading will be displayed, and the file will be saved to the folder of current directory.
 
 
-`url` is the link of file you want to download. There are three urls provided in the code for testing.
+```
+(base) C:\Users\User\Desktop\NetworksDownloader>python downloader.py -n 4 -i https://i.redd.it/9orb8me3xpv11.jpg
+----------downloader----------------
+Number of Threads:     4
+Input URL:             https://i.redd.it/9orb8me3xpv11.jpg
+Data Size:             745899
 
+Start multi-thread downloading...
 
-<br>Then run `downloader.py`. The file will be saved to the folder of where `downloader.py` stored.
+File saved at C:\Users\User\Desktop\NetworksDownloader\9orb8me3xpv11.jpg
+
+Finish downloading in 1.87400007248 seconds
+```
